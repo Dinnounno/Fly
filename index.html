@@ -57,11 +57,10 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* Wrapper untuk scroll tabel di HP */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch; /* Scroll mulus di iOS */
+            -webkit-overflow-scrolling: touch;
             margin-bottom: 15px;
         }
 
@@ -69,7 +68,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            min-width: 600px; /* Memaksa tabel tetap lebar agar input tidak menyempit */
+            min-width: 500px; /* Lebar standar untuk laptop */
         }
 
         th, td {
@@ -82,14 +81,14 @@
         th {
             background-color: #252525;
             color: var(--gold-primary);
-            white-space: nowrap; /* Mencegah judul kolom turun ke baris baru */
+            white-space: nowrap;
         }
 
-        input[type="text"], input[type="number"], select {
+        input[type="text"], input[type="number"], input[type="tel"], select {
             background-color: #000;
             border: 1px solid var(--gold-dark);
             color: var(--gold-light);
-            padding: 10px; /* Padding dibesarkan sedikit agar mudah disentuh */
+            padding: 10px;
             width: 100%;
             box-sizing: border-box;
             font-family: inherit;
@@ -120,7 +119,7 @@
             background-color: var(--gold-dark);
             color: #000;
             border: none;
-            padding: 12px 20px; /* Tombol lebih besar untuk layar sentuh */
+            padding: 12px 20px;
             cursor: pointer;
             font-weight: bold;
             text-transform: uppercase;
@@ -160,14 +159,13 @@
         .summary-box {
             grid-column: 1 / -1;
             text-align: center;
-            font-size: 1.5em;
             margin-top: 10px;
         }
 
         .total-amount {
             color: var(--gold-light);
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: 1.5em;
         }
 
         #historyLog {
@@ -181,46 +179,72 @@
             text-align: left;
         }
 
-        /* --- TAMPILAN KHUSUS HP (MOBILE) --- */
+        /* --- PENYESUAIAN UKURAN KHUSUS HP (MOBILE) --- */
         @media (max-width: 768px) {
             body {
-                padding: 10px; /* Mengurangi jarak pinggir di HP */
+                padding: 8px; /* Mengurangi jarak tepi layar */
+                font-size: 0.9em; /* Mengecilkan teks keseluruhan */
             }
+            h1 { font-size: 1.4em; }
+            h2, h3 { font-size: 1.1em; margin-top: 0; }
             .container {
-                grid-template-columns: 1fr; /* Panel menjadi 1 kolom ke bawah */
-                gap: 15px;
+                grid-template-columns: 1fr;
+                gap: 12px;
             }
             .panel {
-                padding: 15px;
+                padding: 12px; /* Mengecilkan bantalan dalam panel */
             }
+            table {
+                min-width: 400px; /* Tabel diperkecil agar tidak terlalu panjang digeser */
+            }
+            th, td {
+                padding: 6px; /* Sel tabel lebih rapat */
+                font-size: 0.85em; /* Teks dalam tabel lebih kecil */
+            }
+            input[type="text"], input[type="number"], input[type="tel"], select {
+                padding: 6px; /* Kotak input lebih ramping */
+                font-size: 0.9em;
+            }
+            .total-amount { font-size: 1.3em; }
+            
             .transfer-box {
-                flex-direction: column; /* Menu transfer disusun ke bawah */
+                flex-direction: column;
                 align-items: stretch;
+                padding: 10px;
             }
             .transfer-box select, .transfer-box input {
                 width: 100% !important; 
             }
             .transfer-box span {
                 text-align: center;
-                transform: rotate(90deg); /* Panah menghadap ke bawah di HP */
+                transform: rotate(90deg);
                 margin: 5px 0;
             }
             .btn {
-                width: 100%; /* Tombol memenuhi lebar layar agar mudah diklik */
+                width: 100%;
                 margin-bottom: 5px;
+                padding: 10px;
+                font-size: 0.9em;
             }
             .btn-sm {
-                width: 100%; /* Tombol hapus juga memanjang agar tidak salah pencet */
-                padding: 10px;
+                padding: 6px;
+                font-size: 0.8em;
             }
         }
     </style>
 </head>
 <body>
 
+    <div id="loginOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #d4af37;">
+        <h2 style="margin-bottom: 20px;">Akses Terbatas</h2>
+        <input type="password" id="passInput" placeholder="Masukkan PIN" style="padding: 10px; width: 200px; text-align: center; border: 1px solid #d4af37; background: #222; color: white; border-radius: 5px; font-size: 1.2em;">
+        <button onclick="checkPass()" style="margin-top: 15px; padding: 10px 30px; background: #d4af37; border: none; font-weight: bold; cursor: pointer; border-radius: 5px;">BUKA</button>
+        <p id="errMsg" style="color: red; display: none; margin-top: 10px;">PIN Salah!</p>
+    </div>
+
     <div style="text-align: center; margin-bottom: 20px;">
         <h1>Excel Keuangan Pro</h1>
-        <p style="color: #888; font-size: 0.9em;">Sistem Manajemen Aset & Alokasi</p>
+        <p style="color: #888; font-size: 0.85em; margin-top: 5px;">Sistem Manajemen Aset & Alokasi</p>
     </div>
 
     <div class="container">
@@ -280,7 +304,7 @@
 
         <div class="panel" style="grid-column: 1 / -1;">
             <h2>Alokasi / Transfer Dana</h2>
-            <p style="font-size: 0.9em; color: #aaa;">Pindahkan uang antar sumber pemasukan.</p>
+            <p style="font-size: 0.85em; color: #aaa; margin-top: 0;">Pindahkan uang antar sumber pemasukan.</p>
             
             <div class="transfer-box">
                 <select id="transferFrom">
@@ -297,7 +321,7 @@
 
         <div class="panel" style="grid-column: 1 / -1; text-align: center;">
             <h2>Administrasi & Backup</h2>
-            <p style="font-size: 0.9em;">Simpan data bulan ini ke log, atau unduh seluruh data ke Excel sebagai backup.</p>
+            <p style="font-size: 0.85em; margin-top: 0;">Simpan data bulan ini ke log, atau unduh seluruh data ke Excel sebagai backup.</p>
             <button class="btn btn-danger" onclick="resetMonth()">Reset & Simpan Rekap</button>
             <button class="btn btn-success" onclick="exportToExcel()">⬇ Export ke Excel (CSV)</button>
             <button class="btn" onclick="clearLog()" style="background-color: #555; color: white;">Hapus Log</button>
@@ -307,15 +331,31 @@
     </div>
 
     <script>
-         let password = prompt("Masukkan Password untuk Akses:");
-    // Ganti 'rahasia123' dengan password keinginan Anda
-    if (password !== "516789") {
-        document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:20%;'>Akses Ditolak</h1>";
-        // Menghentikan eksekusi kode di bawahnya
-        window.stop(); 
-    }
-        // --- JAVASCRIPT LOGIC ---
+        // --- LOGIKA KUNCI PIN ---
+        const MY_PIN = "123456"; // <-- GANTI PIN ANDA DI SINI
 
+        function checkPass() {
+            const input = document.getElementById('passInput').value;
+            if(input === MY_PIN) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                sessionStorage.setItem('isLoggedIn', 'true');
+            } else {
+                document.getElementById('errMsg').style.display = 'block';
+            }
+        }
+
+        if(sessionStorage.getItem('isLoggedIn') === 'true') {
+            document.getElementById('loginOverlay').style.display = 'none';
+        }
+
+        document.getElementById("passInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                checkPass();
+            }
+        });
+
+
+        // --- JAVASCRIPT LOGIC KEUANGAN ---
         let incomeData = [
             { name: "Bulanan BPD", value: 0 },
             { name: "BNI", value: 0 },
@@ -379,7 +419,7 @@
                 
                 tr.innerHTML = `
                     <td><input type="text" value="${item.name}" placeholder="Nama Sumber..." onchange="updateIncome(${index}, 'name', this.value)"></td>
-                    <td><input type="text" value="${formattedValue}" placeholder="Masukkan nominal..." onchange="updateIncome(${index}, 'value', this.value)" type="tel"></td>
+                    <td><input type="tel" value="${formattedValue}" placeholder="Masukkan nominal..." onchange="updateIncome(${index}, 'value', this.value)"></td>
                     <td style="color: var(--gold-primary); font-weight: bold;">${formatRupiah(currentBalance)}</td>
                     <td><button class="btn btn-danger btn-sm" onclick="removeRow('income', ${index})">Hapus</button></td>
                 `;
@@ -414,7 +454,7 @@
                             ${sourceOptions}
                         </select>
                     </td>
-                    <td><input type="text" value="${formattedValue}" placeholder="Masukkan nominal..." onchange="updateExpense(${index}, 'value', this.value)" type="tel"></td>
+                    <td><input type="tel" value="${formattedValue}" placeholder="Masukkan nominal..." onchange="updateExpense(${index}, 'value', this.value)"></td>
                     <td><button class="btn btn-danger btn-sm" onclick="removeRow('expense', ${index})">Hapus</button></td>
                 `;
                 tbody.appendChild(tr);

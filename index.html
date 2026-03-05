@@ -307,6 +307,13 @@
     </div>
 
     <script>
+         let password = prompt("Masukkan Password untuk Akses:");
+    // Ganti 'rahasia123' dengan password keinginan Anda
+    if (password !== "516789") {
+        document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:20%;'>Akses Ditolak</h1>";
+        // Menghentikan eksekusi kode di bawahnya
+        window.stop(); 
+    }
         // --- JAVASCRIPT LOGIC ---
 
         let incomeData = [

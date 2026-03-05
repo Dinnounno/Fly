@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Excel Keuangan - Saldo Terpisah</title>
+    <style>
+        /* --- CSS: Desain Hitam & Emas --- */
+        :root {
+            --bg-color: #0f0f0f;
+            --panel-color: #1a1a1a;
+            --gold-primary: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-dark: #aa8c2c;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--gold-primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            font-size: 1.8em;
+        }
+
+        h2, h3 {
+            color: var(--gold-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--gold-dark);
+            padding-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--panel-color);
+            border: 1px solid var(--gold-dark);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Wrapper untuk scroll tabel di HP */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Scroll mulus di iOS */
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            min-width: 600px; /* Memaksa tabel tetap lebar agar input tidak menyempit */
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #252525;
+            color: var(--gold-primary);
+            white-space: nowrap; /* Mencegah judul kolom turun ke baris baru */
+        }
+
+        input[type="text"], input[type="number"], select {
+            background-color: #000;
+            border: 1px solid var(--gold-dark);
+            color: var(--gold-light);
+            padding: 10px; /* Padding dibesarkan sedikit agar mudah disentuh */
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        select option {
+            background-color: #000;
+            color: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--gold-light);
+            box-shadow: 0 0 5px var(--gold-dark);
+        }
+
+        .transfer-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+            background: #222;
+            padding: 15px;
+            border: 1px dashed var(--gold-primary);
+        }
+
+        .btn {
+            background-color: var(--gold-dark);
+            color: #000;
+            border: none;
+            padding: 12px 20px; /* Tombol lebih besar untuk layar sentuh */
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: 0.3s;
+            margin-top: 10px;
+            display: inline-block;
+            box-sizing: border-box;
+        }
+
+        .btn:hover {
+            background-color: var(--gold-light);
+        }
+
+        .btn-danger {
+            background-color: #8b0000;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #ff4444;
+        }
+
+        .btn-success {
+            background-color: #1e7e34;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #28a745;
+        }
+
+        .btn-sm {
+            padding: 8px 10px;
+            font-size: 0.8em;
+            margin-top: 0;
+            width: auto;
+        }
+
+        .summary-box {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+
+        .total-amount {
+            color: var(--gold-light);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        #historyLog {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #888;
+            max-height: 200px;
+            overflow-y: auto;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            text-align: left;
+        }
+
+        /* --- TAMPILAN KHUSUS HP (MOBILE) --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px; /* Mengurangi jarak pinggir di HP */
+            }
+            .container {
+                grid-template-columns: 1fr; /* Panel menjadi 1 kolom ke bawah */
+                gap: 15px;
+            }
+            .panel {
+                padding: 15px;
+            }
+            .transfer-box {
+                flex-direction: column; /* Menu transfer disusun ke bawah */
+                align-items: stretch;
+            }
+            .transfer-box select, .transfer-box input {
+                width: 100% !important; 
+            }
+            .transfer-box span {
+                text-align: center;
+                transform: rotate(90deg); /* Panah menghadap ke bawah di HP */
+                margin: 5px 0;
+            }
+            .btn {
+                width: 100%; /* Tombol memenuhi lebar layar agar mudah diklik */
+                margin-bottom: 5px;
+            }
+            .btn-sm {
+                width: 100%; /* Tombol hapus juga memanjang agar tidak salah pencet */
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h1>Excel Keuangan Pro</h1>
+        <p style="color: #888; font-size: 0.9em;">Sistem Manajemen Aset & Alokasi</p>
+    </div>
+
+    <div class="container">
+        
+        <div class="panel summary-box">
+            <h3>Total Saldo Gabungan</h3>
+            <div id="grandTotal" class="total-amount">Rp 0</div>
+        </div>
+
+        <div class="panel">
+            <h2>Pemasukan (In)</h2>
+            <div class="table-responsive">
+                <table id="incomeTable">
+                    <thead>
+                        <tr>
+                            <th width="30%">Sumber</th>
+                            <th width="30%">Jumlah (Rp)</th>
+                            <th width="25%">Saldo</th>
+                            <th width="15%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="text-align: right; font-weight: bold;">Total Pemasukan:</td>
+                            <td colspan="2" id="totalIncomeDisplay" style="color: var(--gold-primary); font-weight: bold;">Rp 0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <button class="btn" onclick="addRow('incomeTable')">+ Tambah Sumber</button>
+        </div>
+
+        <div class="panel">
+            <h2>Pengeluaran (Out)</h2>
+            <div class="table-responsive">
+                <table id="expenseTable">
+                    <thead>
+                        <tr>
+                            <th width="30%">Jenis Pengeluaran</th>
+                            <th width="30%">Sumber Dana</th>
+                            <th width="25%">Jumlah (Rp)</th>
+                            <th width="15%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="text-align: right; font-weight: bold;">Total Pengeluaran:</td>
+                            <td colspan="2" id="totalExpenseDisplay" style="color: #ff4444; font-weight: bold;">Rp 0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <button class="btn" onclick="addRow('expenseTable')">+ Tambah Pengeluaran</button>
+        </div>
+
+        <div class="panel" style="grid-column: 1 / -1;">
+            <h2>Alokasi / Transfer Dana</h2>
+            <p style="font-size: 0.9em; color: #aaa;">Pindahkan uang antar sumber pemasukan.</p>
+            
+            <div class="transfer-box">
+                <select id="transferFrom">
+                    <option value="">Pilih Sumber (Dari)</option>
+                </select>
+                <span style="color: var(--gold-primary);">➔</span>
+                <select id="transferTo">
+                    <option value="">Pilih Tujuan (Ke)</option>
+                </select>
+                <input type="number" id="transferAmount" placeholder="Jumlah Transfer" style="width: 150px;">
+                <button class="btn" onclick="processTransfer()">Transfer</button>
+            </div>
+        </div>
+
+        <div class="panel" style="grid-column: 1 / -1; text-align: center;">
+            <h2>Administrasi & Backup</h2>
+            <p style="font-size: 0.9em;">Simpan data bulan ini ke log, atau unduh seluruh data ke Excel sebagai backup.</p>
+            <button class="btn btn-danger" onclick="resetMonth()">Reset & Simpan Rekap</button>
+            <button class="btn btn-success" onclick="exportToExcel()">⬇ Export ke Excel (CSV)</button>
+            <button class="btn" onclick="clearLog()" style="background-color: #555; color: white;">Hapus Log</button>
+            <div id="historyLog"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- JAVASCRIPT LOGIC ---
+
+        let incomeData = [
+            { name: "Bulanan BPD", value: 0 },
+            { name: "BNI", value: 0 },
+            { name: "Cash", value: 0 }
+        ];
+        
+        let expenseData = [];
+        let savedLogs = ""; 
+        let historyData = []; 
+
+        if(localStorage.getItem('excelFinanceData')) {
+            const savedData = JSON.parse(localStorage.getItem('excelFinanceData'));
+            incomeData = savedData.income || [];
+            expenseData = savedData.expense || [];
+            savedLogs = savedData.logs || ""; 
+            historyData = savedData.history || []; 
+            
+            document.getElementById('historyLog').innerHTML = savedLogs;
+        }
+
+        const formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
+        }
+
+        const formatInput = (value) => {
+            let cleanValue = value.toString().replace(/[^0-9]/g, '');
+            if (cleanValue === '') return '';
+            return new Intl.NumberFormat('id-ID').format(cleanValue);
+        }
+
+        const parseInput = (value) => {
+            return parseInt(value.toString().replace(/\./g, '')) || 0;
+        }
+
+        function renderTables() {
+            renderIncomeTable();
+            renderExpenseTable();
+            updateTransferOptions();
+            calculateGrandTotal();
+        }
+
+        function calculateSourceBalance(sourceName, initialValue) {
+            if (!sourceName) return initialValue;
+            let totalExpenseForThisSource = expenseData.reduce((total, exp) => {
+                if (exp.source === sourceName) {
+                    return total + (parseInt(exp.value) || 0);
+                }
+                return total;
+            }, 0);
+            return initialValue - totalExpenseForThisSource;
+        }
+
+        function renderIncomeTable() {
+            const tbody = document.querySelector(`#incomeTable tbody`);
+            tbody.innerHTML = '';
+            
+            incomeData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const formattedValue = item.value === 0 ? '' : formatInput(item.value);
+                const currentBalance = calculateSourceBalance(item.name, item.value);
+                
+                tr.innerHTML = `
+                    <td><input type="text" value="${item.name}" placeholder="Nama Sumber..." onchange="updateIncome(${index}, 'name', this.value)"></td>
+                    <td><input type="text" value="${formattedValue}" placeholder="Masukkan nominal..." onchange="updateIncome(${index}, 'value', this.value)" type="tel"></td>
+                    <td style="color: var(--gold-primary); font-weight: bold;">${formatRupiah(currentBalance)}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeRow('income', ${index})">Hapus</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderExpenseTable() {
+            const tbody = document.querySelector(`#expenseTable tbody`);
+            tbody.innerHTML = '';
+            
+            expenseData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const formattedValue = item.value === 0 ? '' : formatInput(item.value);
+                
+                let sourceOptions = '<option value="">-- Pilih Sumber Dana --</option>';
+                incomeData.forEach(inc => {
+                    if(inc.name.trim() !== "") {
+                        const selected = item.source === inc.name ? 'selected' : '';
+                        sourceOptions += `<option value="${inc.name}" ${selected}>${inc.name}</option>`;
+                    }
+                });
+                
+                if(item.source && !incomeData.find(i => i.name === item.source)) {
+                     sourceOptions += `<option value="${item.source}" selected>${item.source} (Terhapus)</option>`;
+                }
+
+                tr.innerHTML = `
+                    <td><input type="text" value="${item.name}" placeholder="Cth: Makan, Bensin..." onchange="updateExpense(${index}, 'name', this.value)"></td>
+                    <td>
+                        <select onchange="updateExpense(${index}, 'source', this.value)">
+                            ${sourceOptions}
+                        </select>
+                    </td>
+                    <td><input type="text" value="${formattedValue}" placeholder="Masukkan nominal..." onchange="updateExpense(${index}, 'value', this.value)" type="tel"></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeRow('expense', ${index})">Hapus</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateIncome(index, field, value) {
+            if (field === 'name') {
+                const oldName = incomeData[index].name;
+                incomeData[index].name = value;
+                
+                expenseData.forEach(exp => {
+                    if (exp.source === oldName) {
+                        exp.source = value;
+                    }
+                });
+            } else if (field === 'value') {
+                value = parseInput(value);
+                incomeData[index].value = value;
+            }
+            
+            saveData();
+            renderTables();
+        }
+
+        function updateExpense(index, field, value) {
+            if (field === 'value') value = parseInput(value);
+            expenseData[index][field] = value;
+            saveData();
+            renderTables();
+        }
+
+        function addRow(tableId) {
+            if (tableId === 'incomeTable') {
+                incomeData.push({ name: "", value: 0 });
+            } else {
+                expenseData.push({ name: "", source: "", value: 0 });
+            }
+            renderTables();
+            saveData();
+        }
+
+        function removeRow(type, index) {
+            if (confirm("Hapus baris ini?")) {
+                if (type === 'income') {
+                    const deletedName = incomeData[index].name;
+                    const usedInExpense = expenseData.some(exp => exp.source === deletedName);
+                    if(usedInExpense) {
+                        alert("Catatan: Ada pengeluaran yang menggunakan sumber ini. Sumber di pengeluaran tersebut akan ditandai '(Terhapus)'.");
+                    }
+                    incomeData.splice(index, 1);
+                } else {
+                    expenseData.splice(index, 1);
+                }
+                renderTables();
+                saveData();
+            }
+        }
+
+        function calculateGrandTotal() {
+            let totalIncome = incomeData.reduce((sum, item) => sum + (parseInt(item.value) || 0), 0);
+            let totalExpense = expenseData.reduce((sum, item) => sum + (parseInt(item.value) || 0), 0);
+            let balance = totalIncome - totalExpense;
+            
+            document.getElementById('grandTotal').innerText = formatRupiah(balance);
+            
+            const incomeDisplay = document.getElementById('totalIncomeDisplay');
+            const expenseDisplay = document.getElementById('totalExpenseDisplay');
+            
+            if (incomeDisplay) incomeDisplay.innerText = formatRupiah(totalIncome);
+            if (expenseDisplay) expenseDisplay.innerText = formatRupiah(totalExpense);
+        }
+
+        function updateTransferOptions() {
+            const fromSelect = document.getElementById('transferFrom');
+            const toSelect = document.getElementById('transferTo');
+            
+            const currentFrom = fromSelect.value;
+            const currentTo = toSelect.value;
+
+            fromSelect.innerHTML = '<option value="">Pilih Sumber (Dari)</option>';
+            toSelect.innerHTML = '<option value="">Pilih Tujuan (Ke)</option>';
+
+            incomeData.forEach((item, i) => {
+                if (item.name.trim() !== "") {
+                    fromSelect.innerHTML += `<option value="${i}">${item.name}</option>`;
+                    toSelect.innerHTML += `<option value="${i}">${item.name}</option>`;
+                }
+            });
+
+            fromSelect.value = currentFrom;
+            toSelect.value = currentTo;
+        }
+
+        function processTransfer() {
+            const fromIndex = document.getElementById('transferFrom').value;
+            const toIndex = document.getElementById('transferTo').value;
+            const amount = parseInt(document.getElementById('transferAmount').value);
+
+            if (fromIndex === "" || toIndex === "" || !amount || amount <= 0) {
+                alert("Mohon lengkapi data transfer!");
+                return;
+            }
+
+            if (fromIndex === toIndex) {
+                alert("Sumber dan tujuan tidak boleh sama!");
+                return;
+            }
+
+            const currentBalanceFrom = calculateSourceBalance(incomeData[fromIndex].name, incomeData[fromIndex].value);
+            if(amount > currentBalanceFrom) {
+                alert("Saldo pada sumber tersebut tidak mencukupi untuk transfer!");
+                return;
+            }
+
+            incomeData[fromIndex].value -= amount;
+            incomeData[toIndex].value += amount;
+
+            document.getElementById('transferAmount').value = '';
+            
+            renderTables();
+            saveData();
+            alert("Transfer berhasil!");
+        }
+
+        function saveData() {
+            const data = {
+                income: incomeData,
+                expense: expenseData,
+                logs: document.getElementById('historyLog').innerHTML,
+                history: historyData 
+            };
+            localStorage.setItem('excelFinanceData', JSON.stringify(data));
+        }
+
+        function resetMonth() {
+            if (!confirm("Reset semua data bulan ini ke 0? Data akan disimpan di log.")) return;
+
+            let totalIncome = incomeData.reduce((sum, item) => sum + (parseInt(item.value) || 0), 0);
+            let totalExpense = expenseData.reduce((sum, item) => sum + (parseInt(item.value) || 0), 0);
+            let balance = totalIncome - totalExpense;
+
+            const logDiv = document.getElementById('historyLog');
+            const date = new Date().toLocaleDateString('id-ID');
+            
+            historyData.push({
+                date: date,
+                income: totalIncome,
+                expense: totalExpense,
+                balance: balance
+            });
+
+            let expenseDetails = expenseData.map(e => `${e.name || 'Tanpa Nama'} (${e.source || 'Tidak Diketahui'}): ${formatRupiah(e.value)}`).join('<br>');
+            if(expenseDetails === '') expenseDetails = '-';
+
+            const recapHTML = `
+                <div style="background:#222; padding:15px; margin-bottom:10px; border-left: 3px solid var(--gold-primary); font-size:0.9em;">
+                    <strong style="color:white;">Rekap ${date}</strong><br>
+                    <hr style="border-color:#444;">
+                    Total Masuk: <span style="color:var(--gold-light)">${formatRupiah(totalIncome)}</span><br>
+                    Total Keluar: <span style="color:#ff4444">${formatRupiah(totalExpense)}</span><br>
+                    <strong>Sisa Saldo: ${formatRupiah(balance)}</strong>
+                    <div style="margin-top:5px; color:#aaa; font-style:italic;">
+                        Detail Keluar:<br>
+                        ${expenseDetails}
+                    </div>
+                </div>
+            `;
+            logDiv.innerHTML = recapHTML + logDiv.innerHTML;
+
+            incomeData.forEach(item => item.value = 0);
+            expenseData = []; 
+
+            renderTables();
+            saveData();
+        }
+
+        function clearLog() {
+            if(confirm("Apakah Anda yakin ingin menghapus seluruh riwayat log di bawah? Data yang dihapus tidak dapat dikembalikan.")) {
+                document.getElementById('historyLog').innerHTML = '';
+                historyData = []; 
+                saveData();
+            }
+        }
+
+        function exportToExcel() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            csvContent += "--- DATA AKTIF SAAT INI ---\n";
+            csvContent += "TIPE,NAMA / JENIS,SUMBER DANA,JUMLAH (Rp)\n";
+
+            incomeData.forEach(inc => {
+                if(inc.name) csvContent += `PEMASUKAN,${inc.name},-,${inc.value}\n`;
+            });
+
+            expenseData.forEach(exp => {
+                if(exp.name) csvContent += `PENGELUARAN,${exp.name},${exp.source},${exp.value}\n`;
+            });
+
+            csvContent += "\n--- RIWAYAT REKAP BULANAN ---\n";
+            csvContent += "TANGGAL RESET,TOTAL PEMASUKAN (Rp),TOTAL PENGELUARAN (Rp),SISA SALDO (Rp)\n";
+
+            if(historyData.length > 0) {
+                historyData.forEach(log => {
+                    csvContent += `${log.date},${log.income},${log.expense},${log.balance}\n`;
+                });
+            } else {
+                csvContent += "Belum ada riwayat rekap.,,,\n";
+            }
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            const dateStr = new Date().toLocaleDateString('id-ID').replace(/\//g, '-');
+            
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Rekap_Keuangan_Pro_${dateStr}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Start
+        renderTables(); 
+
+    </script>
+</body>
+</html>
